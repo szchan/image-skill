@@ -1,0 +1,36 @@
+modelscope:
+  api_key: Your-ModelScope-API-Key
+  base_url: https://api-inference.modelscope.cn/
+  default_model: Qwen/Qwen-Image
+  async_mode: true
+models:
+- id: Tongyi-MAI/Z-Image-Turbo
+  name: Z-Image-Turbo
+  description: Fast generation, low cost
+  supports_lora: true
+- id: Qwen/Qwen-Image
+  name: Qwen-Image
+  description: High quality, supports editing
+  supports_lora: true
+- id: Qwen/Qwen-Image-Edit
+  name: Qwen-Image-Edit
+  description: Image editing support
+  supports_lora: true
+- id: black-forest-labs/FLUX.1-dev
+  name: FLUX.1-dev
+  description: High quality open model
+  supports_lora: false
+- id: black-forest-labs/FLUX.1-schnell
+  name: FLUX.1-schnell
+  description: Fast FLUX variant
+  supports_lora: false
+generation:
+  default_prompt: A golden cat
+  default_negative_prompt: ''
+  default_steps: 20
+  default_cfg_scale: 7.0
+  default_width: 1024
+  default_height: 1024
+  output_dir: ./outputs
+  poll_interval: 5
+  timeout: 300

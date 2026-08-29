@@ -1,0 +1,231 @@
+import os
+import json
+import time
+import asyncio
+from pathlib import Path
+from typing import Optional, Dict, Any, List, Union
+from dataclasses import dataclass, field
+from io import BytesIO
+
+import requests
+import yaml
+from PIL import Image
+
+
+@dataclass
+class ModelConfig:
+    id: str
+    name: str
+    description: str
+    supports_lora: bool = False
+
+
+@dataclass
+class GenerationConfig:
+    default_prompt: str = "A golden cat"
+    default_negative_prompt: str = ""
+    default_steps: int = 20
+    default_cfg_scale: float = 7.0
+    default_width: int = 1024
+    default_height: int = 1024
+    output_dir: str = "./outputs"
+    poll_interval: int = 5
+    timeout: int = 300
+
+
+@dataclass
+class ModelScopeConfig:
+    api_key: str
+    base_url: str = "https://api-inference.modelscope.cn/"
+    default_model: str = "Tongyi-MAI/Z-Image-Turbo"
+    async_mode: bool = True
+    models: List[ModelConfig] = field(default_factory=list)
+    generation: GenerationConfig = field(default_factory=GenerationConfig)
+
+
+class ConfigManager:
+    def __init__(self, config_path: str = "config.yaml"):
+        self.config_path = Path(config_path)
+        self._config: Optional[ModelScopeConfig] = None
+
+    def load(self) -> ModelScopeConfig:
+        if self._config is not None:
+            return self._config
+
+        if not self.config_path.exists():
+            raise FileNotFoundError(f"Config file not found: {self.config_path}")
+
+        with open(self.config_path, "r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+
+        ms_data = data.get("modelscope", {})
+        models_data = data.get("models", [])
+        gen_data = data.get("generation", {})
+
+        models = [ModelConfig(**m) for m in models_data]
+        generation = GenerationConfig(**gen_data)
+
+        self._config = ModelScopeConfig(
+            api_key=ms_data.get("api_key", ""),
+            base_url=ms_data.get("base_url", "https://api-inference.modelscope.cn/"),
+            default_model=ms_data.get("default_model", "Tongyi-MAI/Z-Image-Turbo"),
+            async_mode=ms_data.get("async_mode", True),
+            models=models,
+            generation=generation,
+        )
+        return self._config
+
+    def get_model(self, model_id: str) -> Optional[ModelConfig]:
+        config = self.load()
+        for m in config.models:
+            if m.id == model_id:
+                return m
+        return None
+
+    def list_models(self) -> List[ModelConfig]:
+        return self.load().models
+
+    @property
+    def config(self) -> ModelScopeConfig:
+        if self._config is None:
+            self.load()
+        return self._config
+
+
+class ModelscopeClient:
+    def __init__(self, config: Optional[ModelScopeConfig] = None, config_path: str = "config.yaml"):
+        self.config_manager = ConfigManager(config_path)
+        self.config = config or self.config_manager.load()
+        self.session = requests.Session()
+        self.session.headers.update({
+            "Authorization": f"Bearer {self.config.api_key}",
+            "Content-Type": "application/json",
+        })
+
+    def set_model(self, model_id: str) -> bool:
+        model = self.config_manager.get_model(model_id)
+        if model:
+            self.config.default_model = model_id
+            return True
+        return False
+
+    def get_current_model(self) -> str:
+        return self.config.default_model
+
+    def list_available_models(self) -> List[ModelConfig]:
+        return self.config_manager.list_models()
+
+    def generate(
+        self,
+        prompt: str,
+        model: Optional[str] = None,
+        loras: Optional[Union[str, Dict[str, float]]] = None,
+        negative_prompt: Optional[str] = None,
+        steps: Optional[int] = None,
+        cfg_scale: Optional[float] = None,
+        width: Optional[int] = None,
+        height: Optional[int] = None,
+        seed: Optional[int] = None,
+    ) -> List[str]:
+        model_id = model or self.config.default_model
+        gen_config = self.config.generation
+
+        payload = {
+            "model": model_id,
+            "prompt": prompt,
+        }
+
+        if loras:
+            payload["loras"] = loras
+        if negative_prompt:
+            payload["negative_prompt"] = negative_prompt
+        if steps:
+            payload["steps"] = steps
+        if cfg_scale:
+            payload["cfg_scale"] = cfg_scale
+        if width:
+            payload["width"] = width
+        if height:
+            payload["height"] = height
+        if seed is not None:
+            payload["seed"] = seed
+
+        headers = dict(self.session.headers)
+        if self.config.async_mode:
+            headers["X-ModelScope-Async-Mode"] = "true"
+
+        response = self.session.post(
+            f"{self.config.base_url}v1/images/generations",
+            headers=headers,
+            data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+        )
+        response.raise_for_status()
+        result = response.json()
+
+        if self.config.async_mode:
+            task_id = result["task_id"]
+            return self._wait_for_completion(task_id)
+        else:
+            return result.get("output_images", [])
+
+    def _wait_for_completion(self, task_id: str) -> List[str]:
+        start_time = time.time()
+        headers = dict(self.session.headers)
+        headers["X-ModelScope-Task-Type"] = "image_generation"
+
+        while True:
+            if time.time() - start_time > self.config.generation.timeout:
+                raise TimeoutError(f"Task {task_id} timed out after {self.config.generation.timeout}s")
+
+            response = self.session.get(
+                f"{self.config.base_url}v1/tasks/{task_id}",
+                headers=headers,
+            )
+            response.raise_for_status()
+            data = response.json()
+
+            status = data.get("task_status")
+            if status == "SUCCEED":
+                return data.get("output_images", [])
+            elif status == "FAILED":
+                error = data.get("error", "Unknown error")
+                raise RuntimeError(f"Image generation failed: {error}")
+
+            time.sleep(self.config.generation.poll_interval)
+
+    def download_and_save(self, image_url: str, output_path: Path) -> Path:
+        response = requests.get(image_url)
+        response.raise_for_status()
+        image = Image.open(BytesIO(response.content))
+        image.save(output_path)
+        return output_path
+
+    def generate_and_save(
+        self,
+        prompt: str,
+        output_dir: Optional[str] = None,
+        prefix: str = "generated",
+        **kwargs,
+    ) -> List[Path]:
+        urls = self.generate(prompt, **kwargs)
+        output_dir = Path(output_dir or self.config.generation.output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        saved_paths = []
+        for i, url in enumerate(urls):
+            timestamp = int(time.time())
+            filename = f"{prefix}_{timestamp}_{i}.jpg"
+            output_path = output_dir / filename
+            saved = self.download_and_save(url, output_path)
+            saved_paths.append(saved)
+
+        return saved_paths
+
+
+async def async_generate(
+    client: ModelscopeClient,
+    prompt: str,
+    **kwargs,
+) -> List[str]:
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, lambda: client.generate(prompt, **kwargs))
