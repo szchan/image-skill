@@ -1,5 +1,4 @@
 config.yaml
 outputs/
 __pycache__/
-venv/
 research/
