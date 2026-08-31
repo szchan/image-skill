@@ -9,7 +9,7 @@ cd scripts
 uv tool install --editable .
 ```
 
-This installs `image-gen` as a globally available command (`~/.local/bin/image-gen`), backed by an editable install — source edits under `scripts/src/` take effect immediately without reinstalling. Once installed, `image-gen` can be invoked from any directory; it automatically falls back to `scripts/config.yaml` for its API key when no `config.yaml` exists in the current directory.
+This installs `image-gen` as a globally available command (`~/.local/bin/image-gen`), backed by an editable install — source edits under `scripts/src/` take effect immediately without reinstalling. Once installed, `image-gen` can be invoked from any directory; its config resolves in this order: `./config.yaml` in the current directory, then `~/.image-skill/config.yaml`, then `scripts/config.yaml` shipped in this repo (a dev fallback that only resolves for an editable install).
 
 ## Running without installing
 
@@ -22,15 +22,17 @@ uv run python -m image_skill.main generate "..."
 
 ## First-time configuration
 
-Copy `config.yaml.example` to `config.yaml` and add a Modelscope API key:
+Don't have an API key yet? See [`GetFreeToken_ModelScope.md`](../GetFreeToken_ModelScope.md) at the repo root for the full registration/free-quota/API-key walkthrough.
+
+Copy `config.yaml.example` to `~/.image-skill/config.yaml` and add a Modelscope API key:
 
 ```bash
-cd scripts
-cp config.yaml.example config.yaml
-# Edit config.yaml with your API key
+mkdir -p ~/.image-skill
+cp scripts/config.yaml.example ~/.image-skill/config.yaml
+# Edit ~/.image-skill/config.yaml with your API key
 ```
 
-`config.yaml` is gitignored — it holds the real API key. `config.yaml.example` is the checked-in template.
+`config.yaml` is gitignored / kept outside the repo — it holds the real API key. `config.yaml.example` is the checked-in template. A `config.yaml` in the current directory (if you're running in-place inside a checkout) still takes priority over `~/.image-skill/config.yaml`.
 
 ### Config structure
 

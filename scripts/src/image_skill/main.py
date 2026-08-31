@@ -15,7 +15,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from image_skill.modelscope_client import ModelscopeClient, ConfigManager
+from image_skill.modelscope_client import ModelscopeClient, ConfigManager, default_config_path
 
 
 def cmd_generate(args):
@@ -182,19 +182,9 @@ def cmd_current_model(args):
 import yaml
 
 
-def _default_config_path() -> str:
-    """Prefer a config.yaml in the current directory; otherwise fall back to
-    the one shipped alongside this package (scripts/config.yaml), so the CLI
-    works the same whether run in-place or installed via `uv tool install`."""
-    cwd_config = Path("config.yaml")
-    if cwd_config.exists():
-        return str(cwd_config)
-    return str(Path(__file__).resolve().parent.parent.parent / "config.yaml")
-
-
 def main():
     parser = argparse.ArgumentParser(description="Modelscope Image Generation CLI")
-    parser.add_argument("-c", "--config", default=_default_config_path(), help="Config file path")
+    parser.add_argument("-c", "--config", default=default_config_path(), help="Config file path")
 
     subparsers = parser.add_subparsers(dest="command", required=True)
 

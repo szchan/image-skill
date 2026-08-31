@@ -43,15 +43,17 @@ uv tool install --editable .
 
 ## ⚙️ 配置
 
-复制 `config.yaml.example` 为 `config.yaml` 并填入你的 API Key：
+还没有 Modelscope API Key？参考 **[GetFreeToken_ModelScope.md](GetFreeToken_ModelScope.md)**，里面有注册账号、解锁每日免费额度、生成 API Key 的完整流程。
+
+把 `config.yaml.example` 复制到 `~/.image-skill/config.yaml`，并填入你的 API Key：
 
 ```bash
-cd scripts
-cp config.yaml.example config.yaml
-# 编辑 config.yaml，填入你的 API Key
+mkdir -p ~/.image-skill
+cp scripts/config.yaml.example ~/.image-skill/config.yaml
+# 编辑 ~/.image-skill/config.yaml，填入你的 API Key
 ```
 
-`config.yaml` 已被 gitignore。当 `image-gen` 作为全局工具安装后，从其他目录运行时，如果当前目录下没有 `config.yaml`，会自动回退使用 `scripts/config.yaml`。
+`config.yaml` 已被 gitignore / 放在仓库之外。`image-gen` 按以下顺序查找它：当前目录下的 `./config.yaml`，然后是 `~/.image-skill/config.yaml`（上面的标准位置），最后是仓库自带的 `scripts/config.yaml`（仅在可编辑安装场景下作为开发兜底）。
 
 ### 🗂️ 配置文件结构
 
