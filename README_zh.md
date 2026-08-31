@@ -43,7 +43,7 @@ uv tool install --editable .
 
 ## ⚙️ 配置
 
-还没有 Modelscope API Key？参考 **[GetFreeToken_ModelScope_zh.md](GetFreeToken_ModelScope_zh.md)**，里面有注册账号、解锁每日免费额度、生成 API Key 的完整流程。
+还没有 Modelscope API Key？参考 **[GetFreeToken_ModelScope_zh.md](docs/GetFreeToken_ModelScope_zh.md)**，里面有注册账号、解锁每日免费额度、生成 API Key 的完整流程。
 
 把 `config.yaml.example` 复制到 `~/.image-skill/config.yaml`，并填入你的 API Key：
 

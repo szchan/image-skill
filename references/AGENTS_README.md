@@ -78,7 +78,7 @@ image-gen list-models
 
 ## Getting the user a free ModelScope API key
 
-If Step 1 has no key available, don't stall silently and don't invent a placeholder — actively walk the user through it. You cannot do any of this yourself (it requires the user's own login, phone/Alipay verification, and real-name check), but you can shorten the round-trip a lot by telling them exactly what to click, in order, and by verifying the result once they're done. The full human-readable version of these steps lives in [`GetFreeToken_ModelScope.md`](../GetFreeToken_ModelScope.md) — point the user there directly, or relay the steps inline:
+If Step 1 has no key available, don't stall silently and don't invent a placeholder — actively walk the user through it. You cannot do any of this yourself (it requires the user's own login, phone/Alipay verification, and real-name check), but you can shorten the round-trip a lot by telling them exactly what to click, in order, and by verifying the result once they're done. The full human-readable version of these steps lives in [`GetFreeToken_ModelScope.md`](../docs/GetFreeToken_ModelScope.md) — point the user there directly, or relay the steps inline:
 
 1. **Register/log in** at https://modelscope.cn (GitHub, Alipay, or phone login).
 2. **Bind an Alibaba Cloud account and complete real-name verification.** This is the step people skip, and skipping it is the single most common cause of `401 please bind your alibaba cloud account before use` once the key is otherwise configured correctly. Tell the user: avatar menu (top-right) → "绑定阿里云账号" (Bind Alibaba Cloud account) → follow the linked flow to log in/register an Alibaba Cloud account → authorize ModelScope → complete real-name verification (Alipay-linked check or facial recognition) on Alibaba Cloud's side.
@@ -139,7 +139,9 @@ Append to the `models` list in `config.yaml` (see structure above), then referen
 
 ```
 SKILL.md                 # the skill itself — what a triggered agent reads
-GetFreeToken_ModelScope.md # human-facing walkthrough for registering + getting an API key
+docs/
+  GetFreeToken_ModelScope.md    # human-facing walkthrough for registering + getting an API key
+  GetFreeToken_ModelScope_zh.md # Chinese translation
 references/              # progressive-disclosure detail SKILL.md points into
   AGENTS_README.md          # this doc — agent install/setup/config reference
   prompt-guide.md           # model-specific prompt-writing rules

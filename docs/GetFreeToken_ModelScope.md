@@ -2,7 +2,7 @@
 
 English | [中文](GetFreeToken_ModelScope_zh.md)
 
-This guide walks you through registering a ModelScope (魔搭) account, unlocking the free daily API quota, creating an API key, and filling it into `image-skill`'s config. It's written for a human doing this by hand; if you're an AI agent, see the "For AI agents" section in [references/AGENTS_README.md](references/AGENTS_README.md#getting-the-user-a-free-modelscope-api-key) instead — you cannot complete the steps below yourself, only guide a human through them.
+This guide walks you through registering a ModelScope (魔搭) account, unlocking the free daily API quota, creating an API key, and filling it into `image-skill`'s config. It's written for a human doing this by hand; if you're an AI agent, see the "For AI agents" section in [references/AGENTS_README.md](../references/AGENTS_README.md#getting-the-user-a-free-modelscope-api-key) instead — you cannot complete the steps below yourself, only guide a human through them.
 
 ### 1. Register / log in
 

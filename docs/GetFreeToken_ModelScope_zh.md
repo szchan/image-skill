@@ -2,7 +2,7 @@
 
 [English](GetFreeToken_ModelScope.md) | 中文
 
-本指南带你完成：注册 ModelScope（魔搭）账号、解锁每日免费 API 额度、创建 API Key，并把它填到 `image-skill` 的配置文件里。这是给人类手动操作看的；如果你是 AI Agent，请改看 [references/AGENTS_README.md](references/AGENTS_README.md#getting-the-user-a-free-modelscope-api-key) 里的"For AI agents"小节——下面这些步骤你没法替人类完成，只能引导人类去做。
+本指南带你完成：注册 ModelScope（魔搭）账号、解锁每日免费 API 额度、创建 API Key，并把它填到 `image-skill` 的配置文件里。这是给人类手动操作看的；如果你是 AI Agent，请改看 [references/AGENTS_README.md](../references/AGENTS_README.md#getting-the-user-a-free-modelscope-api-key) 里的"For AI agents"小节——下面这些步骤你没法替人类完成，只能引导人类去做。
 
 ### 1. 注册 / 登录
 

@@ -43,7 +43,7 @@ The `--editable` install means edits to `scripts/src/` take effect immediately, 
 
 ## ⚙️ Configuration
 
-Don't have a Modelscope API key yet? See **[GetFreeToken_ModelScope.md](GetFreeToken_ModelScope.md)** for how to register, unlock the free daily quota, and generate one.
+Don't have a Modelscope API key yet? See **[GetFreeToken_ModelScope.md](docs/GetFreeToken_ModelScope.md)** for how to register, unlock the free daily quota, and generate one.
 
 Copy `config.yaml.example` to `~/.image-skill/config.yaml` and add your API key:
 
