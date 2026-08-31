@@ -17,6 +17,9 @@ If `image-gen` is not found on PATH, or `config.yaml` is missing/needs an API ke
 | `image-gen generate "prompt" --model <model-id>` | Generate with specific model |
 | `image-gen edit <image> "prompt"` | Edit an existing image (local path or URL) with a prompt |
 | `image-gen edit <image> "prompt" --model <model-id>` | Edit with a specific edit-capable model |
+| `image-gen generate/edit ... --no-wait` | Submit only — prints a task id immediately instead of blocking |
+| `image-gen status <task_id>` | Check a submitted task once; downloads output if it finished |
+| `image-gen status <task_id> --wait` | Block until that task finishes, then download output |
 | `image-gen list-models` | List available models |
 | `image-gen set-model <model-id>` | Set default model (persists to config.yaml) |
 | `image-gen current-model` | Show current default model |
@@ -24,6 +27,8 @@ If `image-gen` is not found on PATH, or `config.yaml` is missing/needs an API ke
 Every generate/edit command accepts: `--negative-prompt`, `--steps`, `--cfg-scale`, `--width`, `--height`, `--seed`, `-o/--output` (output directory, defaults to `./outputs` relative to wherever the command runs), `-p/--prefix` (filename prefix).
 
 `edit` defaults to `Qwen/Qwen-Image-Edit` when `--model` is omitted, since not all models support editing.
+
+By default `generate`/`edit` block until Modelscope's async task finishes — typically 20s to 2min, occasionally longer for `edit`. If you need to keep working while it runs, don't background the whole `image-gen` process at the shell/tool level — a nested background job (a backgrounded command that itself launches another background job) can report "completed" as soon as the outer wrapper returns, before `image-gen` has actually finished and written its output. Instead, add `--no-wait`: it submits the job and returns a task id in well under a second, so no OS-level backgrounding is needed at all. Do other work, then check it with `image-gen status <task_id>` (single check, exits immediately either way) or `image-gen status <task_id> --wait` (blocks, then downloads) whenever it's convenient — that final `status` call only reports done when the task is genuinely done.
 
 ## Writing the prompt
 

@@ -117,10 +117,10 @@ class ModelscopeClient:
     def list_available_models(self) -> List[ModelConfig]:
         return self.config_manager.list_models()
 
-    def generate(
-        self,
+    @staticmethod
+    def _build_generate_payload(
         prompt: str,
-        model: Optional[str] = None,
+        model_id: str,
         loras: Optional[Union[str, Dict[str, float]]] = None,
         negative_prompt: Optional[str] = None,
         steps: Optional[int] = None,
@@ -128,11 +128,8 @@ class ModelscopeClient:
         width: Optional[int] = None,
         height: Optional[int] = None,
         seed: Optional[int] = None,
-    ) -> List[str]:
-        model_id = model or self.config.default_model
-        gen_config = self.config.generation
-
-        payload = {
+    ) -> Dict[str, Any]:
+        payload: Dict[str, Any] = {
             "model": model_id,
             "prompt": prompt,
         }
@@ -152,9 +149,48 @@ class ModelscopeClient:
         if seed is not None:
             payload["seed"] = seed
 
+        return payload
+
+    def generate(
+        self,
+        prompt: str,
+        model: Optional[str] = None,
+        loras: Optional[Union[str, Dict[str, float]]] = None,
+        negative_prompt: Optional[str] = None,
+        steps: Optional[int] = None,
+        cfg_scale: Optional[float] = None,
+        width: Optional[int] = None,
+        height: Optional[int] = None,
+        seed: Optional[int] = None,
+    ) -> List[str]:
+        payload = self._build_generate_payload(
+            prompt, model or self.config.default_model, loras, negative_prompt,
+            steps, cfg_scale, width, height, seed,
+        )
         return self._submit(payload)
 
-    def _submit(self, payload: Dict[str, Any]) -> List[str]:
+    def submit_generate(
+        self,
+        prompt: str,
+        model: Optional[str] = None,
+        loras: Optional[Union[str, Dict[str, float]]] = None,
+        negative_prompt: Optional[str] = None,
+        steps: Optional[int] = None,
+        cfg_scale: Optional[float] = None,
+        width: Optional[int] = None,
+        height: Optional[int] = None,
+        seed: Optional[int] = None,
+    ) -> str:
+        """Submit a generate job and return its task_id immediately, without
+        waiting for completion. Poll it later with get_task_status() or
+        block on it with wait_for_task(). Requires async_mode: true."""
+        payload = self._build_generate_payload(
+            prompt, model or self.config.default_model, loras, negative_prompt,
+            steps, cfg_scale, width, height, seed,
+        )
+        return self._submit_only(payload)
+
+    def _post(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         headers = dict(self.session.headers)
         if self.config.async_mode:
             headers["X-ModelScope-Async-Mode"] = "true"
@@ -165,13 +201,21 @@ class ModelscopeClient:
             data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
         )
         response.raise_for_status()
-        result = response.json()
+        return response.json()
 
+    def _submit(self, payload: Dict[str, Any]) -> List[str]:
+        result = self._post(payload)
         if self.config.async_mode:
-            task_id = result["task_id"]
-            return self._wait_for_completion(task_id)
-        else:
-            return result.get("output_images", [])
+            return self._wait_for_completion(result["task_id"])
+        return result.get("output_images", [])
+
+    def _submit_only(self, payload: Dict[str, Any]) -> str:
+        if not self.config.async_mode:
+            raise RuntimeError(
+                "Submitting without waiting requires modelscope.async_mode: true in config.yaml "
+                "(sync mode has no task_id to check later)"
+            )
+        return self._post(payload)["task_id"]
 
     @staticmethod
     def _encode_image(image: str) -> Dict[str, str]:
@@ -186,11 +230,11 @@ class ModelscopeClient:
         data = base64.b64encode(path.read_bytes()).decode("ascii")
         return {"image": f"data:{mime};base64,{data}"}
 
-    def edit(
+    def _build_edit_payload(
         self,
         image: str,
         prompt: str,
-        model: Optional[str] = None,
+        model_id: str,
         loras: Optional[Union[str, Dict[str, float]]] = None,
         negative_prompt: Optional[str] = None,
         steps: Optional[int] = None,
@@ -198,12 +242,7 @@ class ModelscopeClient:
         width: Optional[int] = None,
         height: Optional[int] = None,
         seed: Optional[int] = None,
-    ) -> List[str]:
-        """Edit an existing image with a prompt. `image` is a local file path
-        or a remote URL. Use an editing-capable model such as
-        Qwen/Qwen-Image-Edit."""
-        model_id = model or self.config.default_model
-
+    ) -> Dict[str, Any]:
         payload: Dict[str, Any] = {
             "model": model_id,
             "prompt": prompt,
@@ -225,23 +264,80 @@ class ModelscopeClient:
         if seed is not None:
             payload["seed"] = seed
 
+        return payload
+
+    def edit(
+        self,
+        image: str,
+        prompt: str,
+        model: Optional[str] = None,
+        loras: Optional[Union[str, Dict[str, float]]] = None,
+        negative_prompt: Optional[str] = None,
+        steps: Optional[int] = None,
+        cfg_scale: Optional[float] = None,
+        width: Optional[int] = None,
+        height: Optional[int] = None,
+        seed: Optional[int] = None,
+    ) -> List[str]:
+        """Edit an existing image with a prompt. `image` is a local file path
+        or a remote URL. Use an editing-capable model such as
+        Qwen/Qwen-Image-Edit."""
+        payload = self._build_edit_payload(
+            image, prompt, model or self.config.default_model, loras,
+            negative_prompt, steps, cfg_scale, width, height, seed,
+        )
         return self._submit(payload)
+
+    def submit_edit(
+        self,
+        image: str,
+        prompt: str,
+        model: Optional[str] = None,
+        loras: Optional[Union[str, Dict[str, float]]] = None,
+        negative_prompt: Optional[str] = None,
+        steps: Optional[int] = None,
+        cfg_scale: Optional[float] = None,
+        width: Optional[int] = None,
+        height: Optional[int] = None,
+        seed: Optional[int] = None,
+    ) -> str:
+        """Submit an edit job and return its task_id immediately, without
+        waiting for completion. Poll it later with get_task_status() or
+        block on it with wait_for_task(). Requires async_mode: true."""
+        payload = self._build_edit_payload(
+            image, prompt, model or self.config.default_model, loras,
+            negative_prompt, steps, cfg_scale, width, height, seed,
+        )
+        return self._submit_only(payload)
+
+    def get_task_status(self, task_id: str) -> Dict[str, Any]:
+        """One non-blocking check of a submitted task. Returns the raw
+        Modelscope task JSON — inspect `task_status` (`SUCCEED`/`FAILED`/
+        still-running) and, once succeeded, `output_images`."""
+        headers = dict(self.session.headers)
+        headers["X-ModelScope-Task-Type"] = "image_generation"
+
+        response = self.session.get(
+            f"{self.config.base_url}v1/tasks/{task_id}",
+            headers=headers,
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def wait_for_task(self, task_id: str) -> List[str]:
+        """Block, polling at `generation.poll_interval`, until the task
+        succeeds (returning its output image URLs), fails (raising), or
+        exceeds `generation.timeout` (raising TimeoutError)."""
+        return self._wait_for_completion(task_id)
 
     def _wait_for_completion(self, task_id: str) -> List[str]:
         start_time = time.time()
-        headers = dict(self.session.headers)
-        headers["X-ModelScope-Task-Type"] = "image_generation"
 
         while True:
             if time.time() - start_time > self.config.generation.timeout:
                 raise TimeoutError(f"Task {task_id} timed out after {self.config.generation.timeout}s")
 
-            response = self.session.get(
-                f"{self.config.base_url}v1/tasks/{task_id}",
-                headers=headers,
-            )
-            response.raise_for_status()
-            data = response.json()
+            data = self.get_task_status(task_id)
 
             status = data.get("task_status")
             if status == "SUCCEED":
@@ -259,7 +355,7 @@ class ModelscopeClient:
         image.save(output_path)
         return output_path
 
-    def _save_urls(self, urls: List[str], output_dir: Optional[str], prefix: str) -> List[Path]:
+    def save_urls(self, urls: List[str], output_dir: Optional[str] = None, prefix: str = "generated") -> List[Path]:
         output_dir = Path(output_dir or self.config.generation.output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -281,7 +377,7 @@ class ModelscopeClient:
         **kwargs,
     ) -> List[Path]:
         urls = self.generate(prompt, **kwargs)
-        return self._save_urls(urls, output_dir, prefix)
+        return self.save_urls(urls, output_dir, prefix)
 
     def edit_and_save(
         self,
@@ -292,7 +388,7 @@ class ModelscopeClient:
         **kwargs,
     ) -> List[Path]:
         urls = self.edit(image, prompt, **kwargs)
-        return self._save_urls(urls, output_dir, prefix)
+        return self.save_urls(urls, output_dir, prefix)
 
 
 async def async_generate(

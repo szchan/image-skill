@@ -105,6 +105,20 @@ image-gen edit https://example.com/cat.jpg "Make it night time" \
   --model Qwen/Qwen-Image-Edit --negative-prompt "blurry"
 ```
 
+### ⏱️ 不等待，直接返回
+
+`generate`/`edit` 默认会阻塞到 Modelscope 任务完成为止（20秒到2分钟不等，编辑有时更久）。加上 `--no-wait` 可以立即拿到一个任务 ID，之后随时再去查：
+
+```bash
+image-gen generate "A beautiful sunset over mountains" --no-wait
+# → Task submitted: 7ebfeaa1-...
+
+image-gen status 7ebfeaa1-...              # 查一次；如果已完成就直接下载图片
+image-gen status 7ebfeaa1-... --wait       # 或者阻塞等待完成后再下载
+```
+
+这样只有任务真正完成时才会报告完成，不会再出现"外层后台任务提前报完成"的问题。
+
 ### 📋 列出可用模型
 
 ```bash

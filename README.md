@@ -105,6 +105,20 @@ image-gen edit https://example.com/cat.jpg "Make it night time" \
   --model Qwen/Qwen-Image-Edit --negative-prompt "blurry"
 ```
 
+### ⏱️ Run without waiting
+
+`generate`/`edit` normally block until Modelscope's job finishes (20s–2min, sometimes longer for edits). Add `--no-wait` to get a task id back immediately instead, then check on it whenever you like:
+
+```bash
+image-gen generate "A beautiful sunset over mountains" --no-wait
+# → Task submitted: 7ebfeaa1-...
+
+image-gen status 7ebfeaa1-...              # one check; downloads the image if it's done
+image-gen status 7ebfeaa1-... --wait       # or block until it's done, then download
+```
+
+This only ever reports done when the task actually is — no more nested background jobs reporting "completed" early.
+
 ### 📋 List available models
 
 ```bash

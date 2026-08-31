@@ -4,6 +4,8 @@ Modelscope Image Generation CLI
 Usage:
     python main.py generate "A golden cat" --model Tongyi-MAI/Z-Image-Turbo
     python main.py edit ./cat.jpg "Make the cat wear a hat"
+    python main.py generate "A golden cat" --no-wait   # returns a task id right away
+    python main.py status <task_id> --wait             # block on it later, elsewhere
     python main.py list-models
     python main.py set-model Qwen/Qwen-Image
     python main.py current-model
@@ -28,6 +30,20 @@ def cmd_generate(args):
     print(f"Prompt: {args.prompt}")
 
     try:
+        if args.no_wait:
+            task_id = client.submit_generate(
+                prompt=args.prompt,
+                negative_prompt=args.negative_prompt,
+                steps=args.steps,
+                cfg_scale=args.cfg_scale,
+                width=args.width,
+                height=args.height,
+                seed=args.seed,
+            )
+            print(f"\nTask submitted: {task_id}")
+            print(f"Check status with: image-gen status {task_id}")
+            return
+
         paths = client.generate_and_save(
             prompt=args.prompt,
             output_dir=args.output,
@@ -59,6 +75,22 @@ def cmd_edit(args):
     print(f"Prompt: {args.prompt}")
 
     try:
+        if args.no_wait:
+            task_id = client.submit_edit(
+                image=args.image,
+                prompt=args.prompt,
+                model=model,
+                negative_prompt=args.negative_prompt,
+                steps=args.steps,
+                cfg_scale=args.cfg_scale,
+                width=args.width,
+                height=args.height,
+                seed=args.seed,
+            )
+            print(f"\nTask submitted: {task_id}")
+            print(f"Check status with: image-gen status {task_id}")
+            return
+
         paths = client.edit_and_save(
             image=args.image,
             prompt=args.prompt,
@@ -73,6 +105,35 @@ def cmd_edit(args):
             seed=args.seed,
         )
         print(f"\nEdited {len(paths)} image(s):")
+        for p in paths:
+            print(f"  {p}")
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+
+def cmd_status(args):
+    client = ModelscopeClient(config_path=args.config)
+
+    try:
+        if args.wait:
+            urls = client.wait_for_task(args.task_id)
+        else:
+            data = client.get_task_status(args.task_id)
+            status = data.get("task_status")
+            print(f"Status: {status}")
+
+            if status == "FAILED":
+                error = data.get("error", "Unknown error")
+                print(f"Error: {error}")
+                sys.exit(1)
+            elif status != "SUCCEED":
+                return  # still running — nothing more to report yet
+
+            urls = data.get("output_images", [])
+
+        paths = client.save_urls(urls, args.output, args.prefix)
+        print(f"\nSaved {len(paths)} image(s):")
         for p in paths:
             print(f"  {p}")
     except Exception as e:
@@ -149,6 +210,10 @@ def main():
     gen_parser.add_argument("--width", type=int, help="Image width")
     gen_parser.add_argument("--height", type=int, help="Image height")
     gen_parser.add_argument("--seed", type=int, help="Random seed")
+    gen_parser.add_argument(
+        "--no-wait", action="store_true",
+        help="Submit and return immediately with a task id instead of blocking until done; check later with `image-gen status`",
+    )
 
     # edit command
     edit_parser = subparsers.add_parser("edit", aliases=["e"], help="Edit an existing image")
@@ -163,6 +228,17 @@ def main():
     edit_parser.add_argument("--width", type=int, help="Output width")
     edit_parser.add_argument("--height", type=int, help="Output height")
     edit_parser.add_argument("--seed", type=int, help="Random seed")
+    edit_parser.add_argument(
+        "--no-wait", action="store_true",
+        help="Submit and return immediately with a task id instead of blocking until done; check later with `image-gen status`",
+    )
+
+    # status command
+    status_parser = subparsers.add_parser("status", aliases=["st"], help="Check or wait on a task submitted with --no-wait")
+    status_parser.add_argument("task_id", help="Task id printed by a --no-wait generate/edit call")
+    status_parser.add_argument("--wait", action="store_true", help="Block until the task completes instead of checking once")
+    status_parser.add_argument("-o", "--output", help="Output directory")
+    status_parser.add_argument("-p", "--prefix", default="generated", help="Output filename prefix")
 
     # list-models command
     subparsers.add_parser("list-models", aliases=["ls"], help="List available models")
@@ -181,6 +257,8 @@ def main():
         "g": cmd_generate,
         "edit": cmd_edit,
         "e": cmd_edit,
+        "status": cmd_status,
+        "st": cmd_status,
         "list-models": cmd_list_models,
         "ls": cmd_list_models,
         "set-model": cmd_set_model,

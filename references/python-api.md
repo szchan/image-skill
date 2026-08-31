@@ -38,6 +38,25 @@ urls = client.edit(image="https://example.com/cat.jpg", prompt="Make it night ti
 client.set_model("Qwen/Qwen-Image")
 ```
 
+## Submit without waiting
+
+Mirrors the CLI's `--no-wait` / `status`: submit a job, get a `task_id` back immediately, and check or block on it later — without holding the process open or resorting to OS-level backgrounding.
+
+```python
+task_id = client.submit_generate(prompt="A beautiful landscape")
+# ... do other work ...
+
+status = client.get_task_status(task_id)   # one non-blocking check
+if status["task_status"] == "SUCCEED":
+    paths = client.save_urls(status["output_images"])
+
+# or just block until it's done, whenever that's convenient:
+urls = client.wait_for_task(task_id)
+paths = client.save_urls(urls)
+```
+
+`submit_edit(image, prompt, ...)` is the edit-side equivalent of `submit_generate`. Both require `modelscope.async_mode: true` (the default) since there's no `task_id` to check in sync mode.
+
 ## LoRA support
 
 Only reachable via the Python API — `generate()` and `edit()` both accept `loras`:
