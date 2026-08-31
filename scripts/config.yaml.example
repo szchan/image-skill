@@ -31,6 +31,6 @@ generation:
   default_cfg_scale: 7.0
   default_width: 1024
   default_height: 1024
-  output_dir: ./outputs
+  output_dir: .
   poll_interval: 5
   timeout: 300
