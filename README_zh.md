@@ -1,10 +1,10 @@
-# Image Gen Skill - Modelscope API Inference
+# 🎨 Image Gen Skill - Modelscope API Inference
 
 [English](README.md) | 中文
 
 使用 Modelscope API Inference 服务生成和编辑图片的skill。
 
-## 快速安装
+## ⚡ 快速安装
 
 把这段话发给你的 AI Agent：
 
@@ -12,16 +12,25 @@
 安装这个 skill: https://raw.githubusercontent.com/szchan/image-skill/main/AGENTS_README.md
 ```
 
-## 特性
+## 🖼️ 效果示例
 
-- 基于配置文件管理 API Key（不硬编码密钥）
-- 支持多个模型，可随时切换
-- 支持文生图与提示词驱动的图片编辑
-- 异步任务轮询，轮询间隔可配置
-- 自动下载并保存生成的图片
-- 可安装为全局 `uv tool`，也可用 `uv run` 原地运行
+下面两张图都是用这个工具实际跑出来的，不是网上找的示例图。
 
-## 安装
+| `generate` | `edit` |
+|---|---|
+| ![一只狐狸在画架前作画](assets/demo_generate.jpg) | ![一个机器人递给狐狸一支画笔](assets/demo_edit.jpg) |
+| `image-gen generate "A fluffy orange fox sitting at a wooden easel in a cozy sunlit art studio, painting a vibrant abstract canvas with a brush in its paw, warm golden afternoon light through a window, whimsical children's book illustration style, soft textures, rich warm color palette"` | `image-gen edit demo_generate.jpg "Add a small friendly robot standing on the desk next to the fox, handing it a paintbrush, keep the fox and studio the same"` |
+
+## ✨ 特性
+
+- 🔑 基于配置文件管理 API Key（不硬编码密钥）
+- 🔀 支持多个模型，可随时切换
+- 🖌️ 支持文生图与提示词驱动的图片编辑
+- ⏳ 异步任务轮询，轮询间隔可配置
+- 💾 自动下载并保存生成的图片
+- 🧰 可安装为全局 `uv tool`，也可用 `uv run` 原地运行
+
+## 📦 安装
 
 ```bash
 cd scripts
@@ -32,7 +41,7 @@ uv tool install --editable .
 
 `--editable` 安装意味着修改 `scripts/src/` 下的代码会立即生效，无需重新安装。
 
-## 配置
+## ⚙️ 配置
 
 复制 `config.yaml.example` 为 `config.yaml` 并填入你的 API Key：
 
@@ -44,7 +53,7 @@ cp config.yaml.example config.yaml
 
 `config.yaml` 已被 gitignore。当 `image-gen` 作为全局工具安装后，从其他目录运行时，如果当前目录下没有 `config.yaml`，会自动回退使用 `scripts/config.yaml`。
 
-### 配置文件结构
+### 🗂️ 配置文件结构
 
 ```yaml
 modelscope:
@@ -67,9 +76,9 @@ generation:
   timeout: 300
 ```
 
-## 使用方法
+## 🚀 使用方法
 
-### 生成图片
+### 🎨 生成图片
 
 ```bash
 # 使用配置文件中的默认模型
@@ -85,7 +94,7 @@ image-gen generate "A cyberpunk city" \
   --output ./my_images --prefix cyberpunk
 ```
 
-### 编辑已有图片
+### ✏️ 编辑已有图片
 
 ```bash
 # 本地文件路径
@@ -96,19 +105,19 @@ image-gen edit https://example.com/cat.jpg "Make it night time" \
   --model Qwen/Qwen-Image-Edit --negative-prompt "blurry"
 ```
 
-### 列出可用模型
+### 📋 列出可用模型
 
 ```bash
 image-gen list-models
 ```
 
-### 切换默认模型
+### 🔀 切换默认模型
 
 ```bash
 image-gen set-model Qwen/Qwen-Image
 ```
 
-### 查看当前默认模型
+### ℹ️ 查看当前默认模型
 
 ```bash
 image-gen current-model
@@ -116,7 +125,7 @@ image-gen current-model
 
 没有安装为全局工具？在任意命令前加上 `uv run` 即可，例如 `uv run image-gen generate "..."`。
 
-## Python API
+## 🐍 Python API
 
 ```python
 from image_skill.modelscope_client import ModelscopeClient
@@ -146,7 +155,7 @@ urls = client.edit(image="./cat.jpg", prompt="Add a blue hat")
 client.set_model("Qwen/Qwen-Image")
 ```
 
-## 支持的模型（来自配置文件）
+## 🧩 支持的模型（来自配置文件）
 
 - **Tongyi-MAI/Z-Image-Turbo** - 速度快、成本低，支持 LoRA（仅支持生成）
 - **Qwen/Qwen-Image** - 高质量，支持编辑，支持 LoRA
@@ -154,7 +163,7 @@ client.set_model("Qwen/Qwen-Image")
 
 如有需要，可在 `config.yaml` 中添加更多模型。
 
-## LoRA 用法
+## 🎛️ LoRA 用法
 
 ```python
 # 单个 LoRA
@@ -164,6 +173,6 @@ client.generate(prompt="...", loras="username/lora-repo-id")
 client.generate(prompt="...", loras={"lora1": 0.6, "lora2": 0.4})
 ```
 
-## 许可证
+## 📄 许可证
 
 MIT

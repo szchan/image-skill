@@ -1,10 +1,10 @@
-# Image Gen Skill - Modelscope API Inference
+# 🎨 Image Gen Skill - Modelscope API Inference
 
 English | [中文](README_zh.md)
 
 A skill for generating and editing images using Modelscope's API Inference service.
 
-## Quick Install
+## ⚡ Quick Install
 
 Send this to your AI Agent:
 
@@ -12,16 +12,25 @@ Send this to your AI Agent:
 Install this skill: https://raw.githubusercontent.com/szchan/image-skill/main/AGENTS_README.md
 ```
 
-## Features
+## 🖼️ Examples
 
-- Config-based API key management (no hardcoded secrets)
-- Support for multiple models with easy switching
-- Text-to-image generation and prompt-driven image editing
-- Async task polling with configurable intervals
-- Automatic image download and saving
-- Installable as a global `uv tool`, or run in-place with `uv run`
+Both images below were produced by this tool — nothing hand-picked from elsewhere.
 
-## Installation
+| `generate` | `edit` |
+|---|---|
+| ![A fox painting at an easel](assets/demo_generate.jpg) | ![A robot handing the fox a paintbrush](assets/demo_edit.jpg) |
+| `image-gen generate "A fluffy orange fox sitting at a wooden easel in a cozy sunlit art studio, painting a vibrant abstract canvas with a brush in its paw, warm golden afternoon light through a window, whimsical children's book illustration style, soft textures, rich warm color palette"` | `image-gen edit demo_generate.jpg "Add a small friendly robot standing on the desk next to the fox, handing it a paintbrush, keep the fox and studio the same"` |
+
+## ✨ Features
+
+- 🔑 Config-based API key management (no hardcoded secrets)
+- 🔀 Support for multiple models with easy switching
+- 🖌️ Text-to-image generation and prompt-driven image editing
+- ⏳ Async task polling with configurable intervals
+- 💾 Automatic image download and saving
+- 🧰 Installable as a global `uv tool`, or run in-place with `uv run`
+
+## 📦 Installation
 
 ```bash
 cd scripts
@@ -32,7 +41,7 @@ uv tool install --editable .
 
 The `--editable` install means edits to `scripts/src/` take effect immediately, without reinstalling.
 
-## Configuration
+## ⚙️ Configuration
 
 Copy `config.yaml.example` to `config.yaml` and add your API key:
 
@@ -44,7 +53,7 @@ cp config.yaml.example config.yaml
 
 `config.yaml` is gitignored. When `image-gen` is installed as a tool and run from another directory, it automatically falls back to `scripts/config.yaml` if no `config.yaml` exists in the current directory.
 
-### Config Structure
+### 🗂️ Config Structure
 
 ```yaml
 modelscope:
@@ -67,9 +76,9 @@ generation:
   timeout: 300
 ```
 
-## Usage
+## 🚀 Usage
 
-### Generate an image
+### 🎨 Generate an image
 
 ```bash
 # Use default model from config
@@ -85,7 +94,7 @@ image-gen generate "A cyberpunk city" \
   --output ./my_images --prefix cyberpunk
 ```
 
-### Edit an existing image
+### ✏️ Edit an existing image
 
 ```bash
 # Local file path
@@ -96,19 +105,19 @@ image-gen edit https://example.com/cat.jpg "Make it night time" \
   --model Qwen/Qwen-Image-Edit --negative-prompt "blurry"
 ```
 
-### List available models
+### 📋 List available models
 
 ```bash
 image-gen list-models
 ```
 
-### Switch default model
+### 🔀 Switch default model
 
 ```bash
 image-gen set-model Qwen/Qwen-Image
 ```
 
-### Show current default model
+### ℹ️ Show current default model
 
 ```bash
 image-gen current-model
@@ -116,7 +125,7 @@ image-gen current-model
 
 Not using the installed tool? Prefix any command with `uv run`, e.g. `uv run image-gen generate "..."`.
 
-## Python API
+## 🐍 Python API
 
 ```python
 from image_skill.modelscope_client import ModelscopeClient
@@ -146,7 +155,7 @@ urls = client.edit(image="./cat.jpg", prompt="Add a blue hat")
 client.set_model("Qwen/Qwen-Image")
 ```
 
-## Supported Models (from config)
+## 🧩 Supported Models (from config)
 
 - **Tongyi-MAI/Z-Image-Turbo** - Fast, low cost, LoRA support (generate only)
 - **Qwen/Qwen-Image** - High quality, editing support, LoRA support
@@ -154,7 +163,7 @@ client.set_model("Qwen/Qwen-Image")
 
 Add more models to `config.yaml` as needed.
 
-## LoRA Usage
+## 🎛️ LoRA Usage
 
 ```python
 # Single LoRA
@@ -164,6 +173,6 @@ client.generate(prompt="...", loras="username/lora-repo-id")
 client.generate(prompt="...", loras={"lora1": 0.6, "lora2": 0.4})
 ```
 
-## License
+## 📄 License
 
 MIT
