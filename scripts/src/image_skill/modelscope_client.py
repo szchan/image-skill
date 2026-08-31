@@ -45,9 +45,33 @@ class ModelScopeConfig:
     generation: GenerationConfig = field(default_factory=GenerationConfig)
 
 
+USER_CONFIG_PATH = Path.home() / ".image-skill" / "config.yaml"
+
+
+def default_config_path() -> str:
+    """Resolve the config.yaml to use when none is given explicitly.
+
+    Priority:
+    1. ./config.yaml in the current directory (repo-local/dev override)
+    2. ~/.image-skill/config.yaml (the standard location for an installed
+       `image-gen` tool — works regardless of how/where it was installed)
+    3. the config.yaml shipped alongside this package's source checkout
+       (only resolves for an editable `uv tool install`, kept for
+       repo-local dev use)
+    """
+    cwd_config = Path("config.yaml")
+    if cwd_config.exists():
+        return str(cwd_config)
+
+    if USER_CONFIG_PATH.exists():
+        return str(USER_CONFIG_PATH)
+
+    return str(Path(__file__).resolve().parent.parent.parent / "config.yaml")
+
+
 class ConfigManager:
-    def __init__(self, config_path: str = "config.yaml"):
-        self.config_path = Path(config_path)
+    def __init__(self, config_path: Optional[str] = None):
+        self.config_path = Path(config_path or default_config_path())
         self._config: Optional[ModelScopeConfig] = None
 
     def load(self) -> ModelScopeConfig:
@@ -95,7 +119,7 @@ class ConfigManager:
 
 
 class ModelscopeClient:
-    def __init__(self, config: Optional[ModelScopeConfig] = None, config_path: str = "config.yaml"):
+    def __init__(self, config: Optional[ModelScopeConfig] = None, config_path: Optional[str] = None):
         self.config_manager = ConfigManager(config_path)
         self.config = config or self.config_manager.load()
         self.session = requests.Session()

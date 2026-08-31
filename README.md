@@ -43,15 +43,17 @@ The `--editable` install means edits to `scripts/src/` take effect immediately, 
 
 ## ⚙️ Configuration
 
-Copy `config.yaml.example` to `config.yaml` and add your API key:
+Don't have a Modelscope API key yet? See **[GetFreeToken_ModelScope.md](GetFreeToken_ModelScope.md)** for how to register, unlock the free daily quota, and generate one.
+
+Copy `config.yaml.example` to `~/.image-skill/config.yaml` and add your API key:
 
 ```bash
-cd scripts
-cp config.yaml.example config.yaml
-# Edit config.yaml with your API key
+mkdir -p ~/.image-skill
+cp scripts/config.yaml.example ~/.image-skill/config.yaml
+# Edit ~/.image-skill/config.yaml with your API key
 ```
 
-`config.yaml` is gitignored. When `image-gen` is installed as a tool and run from another directory, it automatically falls back to `scripts/config.yaml` if no `config.yaml` exists in the current directory.
+`config.yaml` is gitignored / kept outside the repo. `image-gen` looks for it in this order: `./config.yaml` in the current directory, then `~/.image-skill/config.yaml` (the standard location above), then `scripts/config.yaml` shipped in this repo (a dev fallback that only resolves for an editable install).
 
 ### 🗂️ Config Structure
 
