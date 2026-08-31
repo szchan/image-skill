@@ -9,7 +9,7 @@ A skill for generating and editing images using Modelscope's API Inference servi
 Send this to your AI Agent:
 
 ```bash
-Install this skill: https://raw.githubusercontent.com/szchan/image-skill/main/AGENTS_README.md
+Install this skill: https://raw.githubusercontent.com/szchan/image-skill/main/references/AGENTS_README.md
 ```
 
 ## 🖼️ Examples

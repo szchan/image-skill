@@ -7,7 +7,7 @@ description: Generate/Edit images using Modelscope API Inference. Use when user 
 
 Generate and edit images via Modelscope's API Inference, through the `image-gen` CLI.
 
-If `image-gen` is not found on PATH, or `config.yaml` is missing/needs an API key, stop and read `references/setup.md` first.
+If `image-gen` is not found on PATH, or `config.yaml` is missing/needs an API key, stop and read `references/AGENTS_README.md` first.
 
 ## Commands
 
@@ -50,5 +50,5 @@ Full rationale, more examples, and per-model parameter recommendations (`--cfg-s
 ## Further reference
 
 - Full prompt-writing rationale, examples, and sources — `references/prompt-guide.md`.
-- Installing `image-gen` as a `uv tool`, first-time `config.yaml` setup, adding new models, and how `output_dir` resolves — `references/setup.md`.
+- Installing `image-gen` as a `uv tool`, first-time `config.yaml` setup, adding new models, and how `output_dir` resolves — `references/AGENTS_README.md`.
 - Calling `ModelscopeClient` directly from Python and passing `loras` (not exposed via the CLI) — `references/python-api.md`.

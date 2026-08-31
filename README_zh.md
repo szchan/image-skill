@@ -9,7 +9,7 @@
 把这段话发给你的 AI Agent：
 
 ```bash
-安装这个 skill: https://raw.githubusercontent.com/szchan/image-skill/main/AGENTS_README.md
+安装这个 skill: https://raw.githubusercontent.com/szchan/image-skill/main/references/AGENTS_README.md
 ```
 
 ## 🖼️ 效果示例
