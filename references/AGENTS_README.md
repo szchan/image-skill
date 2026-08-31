@@ -85,7 +85,7 @@ If Step 1 has no key available, don't stall silently and don't invent a placehol
 3. **Create the token** at https://modelscope.cn/my/myaccesstoken → "新建令牌" (Create new token) → copy the `ms-...` value.
 4. **Hand the key back to you**, then you write it into `~/.image-skill/config.yaml` yourself (per Step 1 above) — don't ask the user to edit YAML by hand if you can do it for them.
 
-The free tier is roughly 2000 API calls/day, resetting at 00:00 UTC+8 — mention this if the user asks about limits, but don't block installation on checking it.
+The free tier isn't a fixed number of calls/day — it's settled in Magicube (魔粒) points: daily login earns 200 Magicube/day, plus another 50 Magicube/day once the Alibaba Cloud binding above is done, for roughly 250 Magicube/day total (resets at 00:00 UTC+8, doesn't carry over). Each API-Inference call spends Magicube by model tier (~0.5/1/2 per call for lightweight/mainstream/flagship models), so the actual number of calls that buys varies by model — mention this if the user asks about limits, but don't block installation on checking it. Full rules in [`docs/API-Inference使用限制 · 文档中心.md`](../docs/API-Inference使用限制%20·%20文档中心.md) and [`docs/魔粒体系说明 · 文档中心.md`](../docs/魔粒体系说明%20·%20文档中心.md).
 
 After the user reports the key is created, resume at Step 1: write it into `~/.image-skill/config.yaml` and continue with Step 2 onward. If a `generate`/`edit` call still comes back `401 please bind your alibaba cloud account before use` after the key is in place, that means step 2 above wasn't actually completed — send the user back to it rather than treating it as a bad key.
 
