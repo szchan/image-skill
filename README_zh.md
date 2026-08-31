@@ -2,13 +2,15 @@
 
 [English](README.md) | 中文
 
-使用 Modelscope API Inference 服务生成和编辑图片的 Python 命令行工具。
+使用 Modelscope API Inference 服务生成和编辑图片的skill。
 
 ## 快速安装
 
 把这段话发给你的 AI Agent：
 
-> 安装这个 skill: https://raw.githubusercontent.com/szchan/image-skill/main/AGENTS_README.md
+```bash
+安装这个 skill: https://raw.githubusercontent.com/szchan/image-skill/main/AGENTS_README.md
+```
 
 ## 特性
 
