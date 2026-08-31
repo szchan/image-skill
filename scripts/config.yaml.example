@@ -16,14 +16,6 @@ models:
   name: Qwen-Image-Edit
   description: Image editing support
   supports_lora: true
-- id: black-forest-labs/FLUX.1-dev
-  name: FLUX.1-dev
-  description: High quality open model
-  supports_lora: false
-- id: black-forest-labs/FLUX.1-schnell
-  name: FLUX.1-schnell
-  description: Fast FLUX variant
-  supports_lora: false
 generation:
   default_prompt: A golden cat
   default_negative_prompt: ''

@@ -141,8 +141,6 @@ client.set_model("Qwen/Qwen-Image")
 - **Tongyi-MAI/Z-Image-Turbo** - Fast, low cost, LoRA support (generate only)
 - **Qwen/Qwen-Image** - High quality, editing support, LoRA support
 - **Qwen/Qwen-Image-Edit** - Image editing, LoRA support
-- **black-forest-labs/FLUX.1-dev** - High quality open model
-- **black-forest-labs/FLUX.1-schnell** - Fast FLUX variant
 
 Add more models to `config.yaml` as needed.
 

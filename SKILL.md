@@ -30,8 +30,6 @@ Every generate/edit command accepts: `--negative-prompt`, `--steps`, `--cfg-scal
 - `Tongyi-MAI/Z-Image-Turbo` — Fast, low cost, LoRA support (generate only)
 - `Qwen/Qwen-Image` — High quality, editing support, LoRA support
 - `Qwen/Qwen-Image-Edit` — Image editing, LoRA support
-- `black-forest-labs/FLUX.1-dev` — High quality open model
-- `black-forest-labs/FLUX.1-schnell` — Fast FLUX variant
 
 ## Further reference
 
