@@ -4,6 +4,12 @@ English | [中文](README_zh.md)
 
 A Python CLI tool for generating and editing images using Modelscope's API Inference service.
 
+## Quick Install
+
+Send this to your AI Agent:
+
+> Install this skill: https://raw.githubusercontent.com/szchan/image-skill/main/AGENTS_README.md
+
 ## Features
 
 - Config-based API key management (no hardcoded secrets)
