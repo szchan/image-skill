@@ -1,5 +1,7 @@
 # Image Gen Skill - Modelscope API Inference
 
+English | [中文](README_zh.md)
+
 A Python CLI tool for generating and editing images using Modelscope's API Inference service.
 
 ## Features
