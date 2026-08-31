@@ -3,6 +3,7 @@
 Modelscope Image Generation CLI
 Usage:
     python main.py generate "A golden cat" --model Tongyi-MAI/Z-Image-Turbo
+    python main.py edit ./cat.jpg "Make the cat wear a hat"
     python main.py list-models
     python main.py set-model Qwen/Qwen-Image
     python main.py current-model
@@ -12,7 +13,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from modelscope_client import ModelscopeClient, ConfigManager
+from image_skill.modelscope_client import ModelscopeClient, ConfigManager
 
 
 def cmd_generate(args):
@@ -39,6 +40,39 @@ def cmd_generate(args):
             seed=args.seed,
         )
         print(f"\nGenerated {len(paths)} image(s):")
+        for p in paths:
+            print(f"  {p}")
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+
+EDIT_DEFAULT_MODEL = "Qwen/Qwen-Image-Edit"
+
+
+def cmd_edit(args):
+    client = ModelscopeClient(config_path=args.config)
+    model = args.model or EDIT_DEFAULT_MODEL
+
+    print(f"Using model: {model}")
+    print(f"Source image: {args.image}")
+    print(f"Prompt: {args.prompt}")
+
+    try:
+        paths = client.edit_and_save(
+            image=args.image,
+            prompt=args.prompt,
+            model=model,
+            output_dir=args.output,
+            prefix=args.prefix,
+            negative_prompt=args.negative_prompt,
+            steps=args.steps,
+            cfg_scale=args.cfg_scale,
+            width=args.width,
+            height=args.height,
+            seed=args.seed,
+        )
+        print(f"\nEdited {len(paths)} image(s):")
         for p in paths:
             print(f"  {p}")
     except Exception as e:
@@ -87,9 +121,19 @@ def cmd_current_model(args):
 import yaml
 
 
+def _default_config_path() -> str:
+    """Prefer a config.yaml in the current directory; otherwise fall back to
+    the one shipped alongside this package (scripts/config.yaml), so the CLI
+    works the same whether run in-place or installed via `uv tool install`."""
+    cwd_config = Path("config.yaml")
+    if cwd_config.exists():
+        return str(cwd_config)
+    return str(Path(__file__).resolve().parent.parent.parent / "config.yaml")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Modelscope Image Generation CLI")
-    parser.add_argument("-c", "--config", default="config.yaml", help="Config file path")
+    parser.add_argument("-c", "--config", default=_default_config_path(), help="Config file path")
 
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -106,6 +150,20 @@ def main():
     gen_parser.add_argument("--height", type=int, help="Image height")
     gen_parser.add_argument("--seed", type=int, help="Random seed")
 
+    # edit command
+    edit_parser = subparsers.add_parser("edit", aliases=["e"], help="Edit an existing image")
+    edit_parser.add_argument("image", help="Path or URL of the source image to edit")
+    edit_parser.add_argument("prompt", help="Prompt describing the edit")
+    edit_parser.add_argument("-m", "--model", help=f"Model ID to use (default: {EDIT_DEFAULT_MODEL})")
+    edit_parser.add_argument("-o", "--output", help="Output directory")
+    edit_parser.add_argument("-p", "--prefix", default="edited", help="Output filename prefix")
+    edit_parser.add_argument("--negative-prompt", help="Negative prompt")
+    edit_parser.add_argument("--steps", type=int, help="Number of inference steps")
+    edit_parser.add_argument("--cfg-scale", type=float, help="CFG scale")
+    edit_parser.add_argument("--width", type=int, help="Output width")
+    edit_parser.add_argument("--height", type=int, help="Output height")
+    edit_parser.add_argument("--seed", type=int, help="Random seed")
+
     # list-models command
     subparsers.add_parser("list-models", aliases=["ls"], help="List available models")
 
@@ -121,6 +179,8 @@ def main():
     commands = {
         "generate": cmd_generate,
         "g": cmd_generate,
+        "edit": cmd_edit,
+        "e": cmd_edit,
         "list-models": cmd_list_models,
         "ls": cmd_list_models,
         "set-model": cmd_set_model,

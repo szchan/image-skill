@@ -136,7 +136,7 @@ wheels = [
 ]
 
 [[package]]
-name = "image-gen-script-for-modelscope-free"
+name = "image-skill"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

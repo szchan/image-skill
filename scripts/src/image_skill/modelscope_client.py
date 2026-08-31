@@ -1,6 +1,8 @@
 import os
 import json
 import time
+import base64
+import mimetypes
 import asyncio
 from pathlib import Path
 from typing import Optional, Dict, Any, List, Union
@@ -150,6 +152,9 @@ class ModelscopeClient:
         if seed is not None:
             payload["seed"] = seed
 
+        return self._submit(payload)
+
+    def _submit(self, payload: Dict[str, Any]) -> List[str]:
         headers = dict(self.session.headers)
         if self.config.async_mode:
             headers["X-ModelScope-Async-Mode"] = "true"
@@ -167,6 +172,57 @@ class ModelscopeClient:
             return self._wait_for_completion(task_id)
         else:
             return result.get("output_images", [])
+
+    @staticmethod
+    def _encode_image(image: str) -> Dict[str, str]:
+        """Build the payload field for an input image: a remote URL is passed
+        through as `image_url`; a local path is base64-encoded into `image`
+        as a data URI, since the API accepts either."""
+        if image.startswith("http://") or image.startswith("https://"):
+            return {"image_url": image}
+
+        path = Path(image)
+        mime = mimetypes.guess_type(path.name)[0] or "image/jpeg"
+        data = base64.b64encode(path.read_bytes()).decode("ascii")
+        return {"image": f"data:{mime};base64,{data}"}
+
+    def edit(
+        self,
+        image: str,
+        prompt: str,
+        model: Optional[str] = None,
+        negative_prompt: Optional[str] = None,
+        steps: Optional[int] = None,
+        cfg_scale: Optional[float] = None,
+        width: Optional[int] = None,
+        height: Optional[int] = None,
+        seed: Optional[int] = None,
+    ) -> List[str]:
+        """Edit an existing image with a prompt. `image` is a local file path
+        or a remote URL. Use an editing-capable model such as
+        Qwen/Qwen-Image-Edit."""
+        model_id = model or self.config.default_model
+
+        payload: Dict[str, Any] = {
+            "model": model_id,
+            "prompt": prompt,
+            **self._encode_image(image),
+        }
+
+        if negative_prompt:
+            payload["negative_prompt"] = negative_prompt
+        if steps:
+            payload["steps"] = steps
+        if cfg_scale:
+            payload["cfg_scale"] = cfg_scale
+        if width:
+            payload["width"] = width
+        if height:
+            payload["height"] = height
+        if seed is not None:
+            payload["seed"] = seed
+
+        return self._submit(payload)
 
     def _wait_for_completion(self, task_id: str) -> List[str]:
         start_time = time.time()
@@ -200,14 +256,7 @@ class ModelscopeClient:
         image.save(output_path)
         return output_path
 
-    def generate_and_save(
-        self,
-        prompt: str,
-        output_dir: Optional[str] = None,
-        prefix: str = "generated",
-        **kwargs,
-    ) -> List[Path]:
-        urls = self.generate(prompt, **kwargs)
+    def _save_urls(self, urls: List[str], output_dir: Optional[str], prefix: str) -> List[Path]:
         output_dir = Path(output_dir or self.config.generation.output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -220,6 +269,27 @@ class ModelscopeClient:
             saved_paths.append(saved)
 
         return saved_paths
+
+    def generate_and_save(
+        self,
+        prompt: str,
+        output_dir: Optional[str] = None,
+        prefix: str = "generated",
+        **kwargs,
+    ) -> List[Path]:
+        urls = self.generate(prompt, **kwargs)
+        return self._save_urls(urls, output_dir, prefix)
+
+    def edit_and_save(
+        self,
+        image: str,
+        prompt: str,
+        output_dir: Optional[str] = None,
+        prefix: str = "edited",
+        **kwargs,
+    ) -> List[Path]:
+        urls = self.edit(image, prompt, **kwargs)
+        return self._save_urls(urls, output_dir, prefix)
 
 
 async def async_generate(

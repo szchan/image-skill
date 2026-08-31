@@ -1,42 +1,58 @@
 ---
-name: image-gen-skill
-description: Generate images using Modelscope API Inference. Use when user wants to create, generate, or edit images via Modelscope's hosted models (Z-Image-Turbo, Qwen-Image, FLUX, etc.). Trigger phrases: "generate image", "create image", "image generation", "Modelscope image", "AI image", "画图", "生成图片".
+name: image-skill
+description: Generate/Edit images using Modelscope API Inference. Use when user wants to generate, or edit images via Modelscope's hosted models (Z-Image-Turbo, Qwen-Image, FLUX, etc.). Trigger phrases: "generate image", "create image", "image generation", "edit image", "Modelscope image", "AI image", "画图", "生成图片".
 ---
 
-# Image Gen Skill — Modelscope API Inference
+# Image Skill — Modelscope API Inference
 
-A skill for generating images via Modelscope's API Inference service.
+A skill for generating and editing images via Modelscope's API Inference service.
 
 ## Setup
 
 The skill expects a project at `scripts/` with:
 
 - `config.yaml` — API key, model list, generation defaults
-- `modelscope_client.py` — Python client library
-- `main.py` — CLI entry point
-- `venv/` — Python virtual environment with dependencies
+- `src/image_skill/modelscope_client.py` — Python client library
+- `src/image_skill/main.py` — CLI entry point
+- `pyproject.toml` — `uv`-managed package definition, exposes the `image-gen` CLI script
 
-## Quick Start
+### Installing as a local tool (recommended for Agent use)
 
 ```bash
 cd scripts
-source venv/bin/activate
-python main.py generate "中文提示词/English prompt"
+uv tool install --editable .
+```
+
+This installs `image-gen` as a globally available command (`~/.local/bin/image-gen`), backed by an editable install — source edits under `scripts/src/` take effect immediately without reinstalling. Once installed, `image-gen` can be invoked from any directory; it automatically falls back to `scripts/config.yaml` for its API key when no `config.yaml` exists in the current directory.
+
+### Running without installing
+
+```bash
+cd scripts
+uv run image-gen generate "中文提示词/English prompt"
+# or
+uv run python -m image_skill.main generate "..."
 ```
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `python main.py generate "prompt"` | Generate image with default model |
-| `python main.py generate "prompt" --model <model-id>` | Generate with specific model |
-| `python main.py list-models` | List available models |
-| `python main.py set-model <model-id>` | Set default model (persists to config.yaml) |
-| `python main.py current-model` | Show current default model |
+| `image-gen generate "prompt"` | Generate image with default model |
+| `image-gen generate "prompt" --model <model-id>` | Generate with specific model |
+| `image-gen edit <image> "prompt"` | Edit an existing image (path or URL) with a prompt |
+| `image-gen edit <image> "prompt" --model <model-id>` | Edit with a specific edit-capable model |
+| `image-gen list-models` | List available models |
+| `image-gen set-model <model-id>` | Set default model (persists to config.yaml) |
+| `image-gen current-model` | Show current default model |
+
+Every generation/edit command accepts: `--negative-prompt`, `--steps`, `--cfg-scale`, `--width`, `--height`, `--seed`, `-o/--output` (output directory), `-p/--prefix` (filename prefix).
+
+`edit` defaults to `Qwen/Qwen-Image-Edit` when `--model` is omitted, since not all models support editing.
 
 ## Available Models (from config.yaml)
 
-- `Tongyi-MAI/Z-Image-Turbo` — Fast, low cost, LoRA support
+- `Tongyi-MAI/Z-Image-Turbo` — Fast, low cost, LoRA support (generate only)
 - `Qwen/Qwen-Image` — High quality, editing support, LoRA support
 - `Qwen/Qwen-Image-Edit` — Image editing, LoRA support
 - `black-forest-labs/FLUX.1-dev` — High quality open model
@@ -45,7 +61,7 @@ python main.py generate "中文提示词/English prompt"
 ## Python API
 
 ```python
-from modelscope_client import ModelscopeClient
+from image_skill.modelscope_client import ModelscopeClient
 
 client = ModelscopeClient(config_path="config.yaml")
 
@@ -53,14 +69,26 @@ client = ModelscopeClient(config_path="config.yaml")
 paths = client.generate_and_save(
     prompt="A golden cat",
     model="Tongyi-MAI/Z-Image-Turbo",  # optional, uses default
+    negative_prompt="blurry, low quality",
     width=1024,
     height=1024,
     steps=20,
     cfg_scale=7.0,
 )
 
-# Just get URLs
+# Edit an existing image (local path or URL) and save to ./outputs/
+paths = client.edit_and_save(
+    image="./cat.jpg",
+    prompt="Add a blue hat",
+    model="Qwen/Qwen-Image-Edit",  # optional, uses default
+    negative_prompt="deformed",
+    width=1024,
+    height=1024,
+)
+
+# Just get URLs, without downloading
 urls = client.generate(prompt="A beautiful landscape")
+urls = client.edit(image="https://example.com/cat.jpg", prompt="Make it night time")
 
 # Switch model programmatically
 client.set_model("Qwen/Qwen-Image")
@@ -109,13 +137,14 @@ models:
 
 ## Requirements
 
-- Python 3.10+
-- `requests`, `pyyaml`, `pillow` (in requirements.txt)
+- Python 3.13+
+- `requests`, `pyyaml`, `pillow` (managed via `uv` / `pyproject.toml`)
 
 ## Trigger Keywords
 
 Use this skill when user says:
 - "generate image", "create image", "image generation"
-- "Modelscope image", "AI image", "画图", "生成图片"
+- "edit image", "image editing"
+- "Modelscope image", "AI image", "画图", "生成图片", "编辑图片"
 - "Z-Image", "Qwen-Image", "FLUX"
-- "Modelscope API", "image-gen-skill"
+- "Modelscope API", "image-skill"

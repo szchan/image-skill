@@ -1,30 +1,38 @@
 # Image Gen Skill - Modelscope API Inference
 
-A Python CLI tool for generating images using Modelscope's API Inference service.
+A Python CLI tool for generating and editing images using Modelscope's API Inference service.
 
 ## Features
 
 - Config-based API key management (no hardcoded secrets)
 - Support for multiple models with easy switching
+- Text-to-image generation and prompt-driven image editing
 - Async task polling with configurable intervals
 - Automatic image download and saving
-- CLI interface for generation and model management
+- Installable as a global `uv tool`, or run in-place with `uv run`
 
 ## Installation
 
 ```bash
-pip install -r requirements.txt
+cd scripts
+uv sync                        # install deps into scripts/.venv
+# or, to get a global `image-gen` command:
+uv tool install --editable .
 ```
+
+The `--editable` install means edits to `scripts/src/` take effect immediately, without reinstalling.
 
 ## Configuration
 
-1. Copy `.env.example` to `.env` and add your API key:
-   ```bash
-   cp .env.example .env
-   # Edit .env with your API key
-   ```
+Copy `config.yaml.example` to `config.yaml` and add your API key:
 
-2. Or edit `config.yaml` directly to set your API key and preferred models.
+```bash
+cd scripts
+cp config.yaml.example config.yaml
+# Edit config.yaml with your API key
+```
+
+`config.yaml` is gitignored. When `image-gen` is installed as a tool and run from another directory, it automatically falls back to `scripts/config.yaml` if no `config.yaml` exists in the current directory.
 
 ### Config Structure
 
@@ -55,40 +63,53 @@ generation:
 
 ```bash
 # Use default model from config
-python main.py generate "A beautiful sunset over mountains"
+image-gen generate "A beautiful sunset over mountains"
 
 # Use specific model
-python main.py generate "A golden cat" --model Qwen/Qwen-Image
+image-gen generate "A golden cat" --model Qwen/Qwen-Image
 
 # With custom parameters
-python main.py generate "A cyberpunk city" \
+image-gen generate "A cyberpunk city" \
   --width 1024 --height 1024 \
   --steps 30 --cfg-scale 7.5 \
   --output ./my_images --prefix cyberpunk
 ```
 
+### Edit an existing image
+
+```bash
+# Local file path
+image-gen edit ./cat.jpg "Add a blue hat"
+
+# Remote URL, with a specific model and negative prompt
+image-gen edit https://example.com/cat.jpg "Make it night time" \
+  --model Qwen/Qwen-Image-Edit --negative-prompt "blurry"
+```
+
 ### List available models
 
 ```bash
-python main.py list-models
+image-gen list-models
 ```
 
 ### Switch default model
 
 ```bash
-python main.py set-model Qwen/Qwen-Image
+image-gen set-model Qwen/Qwen-Image
 ```
 
 ### Show current default model
 
 ```bash
-python main.py current-model
+image-gen current-model
 ```
+
+Not using the installed tool? Prefix any command with `uv run`, e.g. `uv run image-gen generate "..."`.
 
 ## Python API
 
 ```python
-from modelscope_client import ModelscopeClient
+from image_skill.modelscope_client import ModelscopeClient
 
 client = ModelscopeClient(config_path="config.yaml")
 
@@ -100,8 +121,16 @@ paths = client.generate_and_save(
     height=1024,
 )
 
+# Edit an existing image (local path or URL) and save
+paths = client.edit_and_save(
+    image="./cat.jpg",
+    prompt="Add a blue hat",
+    model="Qwen/Qwen-Image-Edit",
+)
+
 # Or just get URLs
 urls = client.generate(prompt="A beautiful landscape")
+urls = client.edit(image="./cat.jpg", prompt="Add a blue hat")
 
 # Switch model
 client.set_model("Qwen/Qwen-Image")
@@ -109,7 +138,7 @@ client.set_model("Qwen/Qwen-Image")
 
 ## Supported Models (from config)
 
-- **Tongyi-MAI/Z-Image-Turbo** - Fast, low cost, LoRA support
+- **Tongyi-MAI/Z-Image-Turbo** - Fast, low cost, LoRA support (generate only)
 - **Qwen/Qwen-Image** - High quality, editing support, LoRA support
 - **Qwen/Qwen-Image-Edit** - Image editing, LoRA support
 - **black-forest-labs/FLUX.1-dev** - High quality open model
