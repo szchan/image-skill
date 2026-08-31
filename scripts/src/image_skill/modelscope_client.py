@@ -191,6 +191,7 @@ class ModelscopeClient:
         image: str,
         prompt: str,
         model: Optional[str] = None,
+        loras: Optional[Union[str, Dict[str, float]]] = None,
         negative_prompt: Optional[str] = None,
         steps: Optional[int] = None,
         cfg_scale: Optional[float] = None,
@@ -209,6 +210,8 @@ class ModelscopeClient:
             **self._encode_image(image),
         }
 
+        if loras:
+            payload["loras"] = loras
         if negative_prompt:
             payload["negative_prompt"] = negative_prompt
         if steps:
