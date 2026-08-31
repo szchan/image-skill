@@ -1,1 +1,6 @@
-AGENTS_README.md和references/setup.md的职能有些重叠，我希望将它们合并到references/AGENTS_README.md，注意现有的引用关系要调整。
+我希望将GetFreeToken_ModelScope_zh.md和GetFreeToken_ModelScope.md放到docs/中
+
+注意引用关系要处理
+
+最终要merge到develop branch
+
