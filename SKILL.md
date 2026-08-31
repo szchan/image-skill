@@ -25,6 +25,17 @@ Every generate/edit command accepts: `--negative-prompt`, `--steps`, `--cfg-scal
 
 `edit` defaults to `Qwen/Qwen-Image-Edit` when `--model` is omitted, since not all models support editing.
 
+## Writing the prompt
+
+Apply before every `generate`/`edit` call — generation and editing need genuinely different prompt shapes, and getting this wrong is the main cause of bad output:
+
+- **Generate** with Qwen-Image: order the prompt subject → style/medium → setting → lighting/mood → detail, 1–3 sentences. Any text that must render in the image goes in `"double quotes"` — this alone is the biggest lever on text accuracy.
+- **Generate** with Z-Image-Turbo: write a long, detailed creative brief instead — this model rewards detail. It has no negative-prompt support at all; `--negative-prompt` is silently ignored, so fold every constraint into the main prompt as a positive statement ("sharp focus" not "not blurry").
+- **Edit** with Qwen-Image-Edit: write an instruction describing the *change*, never a description of the end state. Bad: `"A woman with short brown hair in a blue blouse"`. Good: `"Change her hair to short brown and her blouse to blue"`. When multiple similar objects are in frame, disambiguate by position/attribute (`"the second person from the left"`). For in-image text edits, quote the exact replacement text — font/size/style carry over unless you say otherwise.
+- For a multi-stage edit, run `edit` twice — feed the first result back in as the next `image` argument — rather than stacking unrelated changes into one instruction.
+
+Full rationale, more examples, and per-model parameter recommendations (`--cfg-scale`/`--steps`) — `references/prompt-guide.md`.
+
 ## Available Models (from config.yaml)
 
 - `Tongyi-MAI/Z-Image-Turbo` — Fast, low cost, LoRA support (generate only)
@@ -33,5 +44,6 @@ Every generate/edit command accepts: `--negative-prompt`, `--steps`, `--cfg-scal
 
 ## Further reference
 
+- Full prompt-writing rationale, examples, and sources — `references/prompt-guide.md`.
 - Installing `image-gen` as a `uv tool`, first-time `config.yaml` setup, adding new models, and how `output_dir` resolves — `references/setup.md`.
 - Calling `ModelscopeClient` directly from Python and passing `loras` (not exposed via the CLI) — `references/python-api.md`.
