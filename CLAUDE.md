@@ -1,6 +1,3 @@
-我希望将GetFreeToken_ModelScope_zh.md和GetFreeToken_ModelScope.md放到docs/中
-
-注意引用关系要处理
+GetFreeToken_ModelScope_zh.md/GetFreeToken_ModelScope.md/AGENTS_README.md中关于获得每日免费额度的说明有误，参考docs/API-Inference使用限制 · 文档中心.md和docs/魔粒体系说明 · 文档中心.md进行更正
 
 最终要merge到develop branch
-
