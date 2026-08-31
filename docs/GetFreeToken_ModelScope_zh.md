@@ -2,7 +2,7 @@
 
 [English](GetFreeToken_ModelScope.md) | 中文
 
-本指南带你完成：注册 ModelScope（魔搭）账号、解锁每日免费 API 额度、创建 API Key，并把它填到 `image-skill` 的配置文件里。这是给人类手动操作看的；如果你是 AI Agent，请改看 [AGENTS_README.md](AGENTS_README.md#getting-the-user-a-free-modelscope-api-key) 里的"For AI agents"小节——下面这些步骤你没法替人类完成，只能引导人类去做。
+本指南带你完成：注册 ModelScope（魔搭）账号、解锁每日免费 API 额度、创建 API Key，并把它填到 `image-skill` 的配置文件里。这是给人类手动操作看的；如果你是 AI Agent，请改看 [references/AGENTS_README.md](../references/AGENTS_README.md#getting-the-user-a-free-modelscope-api-key) 里的"For AI agents"小节——下面这些步骤你没法替人类完成，只能引导人类去做。
 
 ### 1. 注册 / 登录
 
@@ -31,7 +31,7 @@
 
 ### 4. 查看免费额度（可选）
 
-头像菜单 → **API 使用情况**。免费额度大约是**每天 2000 次调用**，每天 00:00（UTC+8）重置，不会累积到第二天。这个额度是给开发、测试、原型验证用的，不适合生产环境的高并发流量；部分模型在总额度之外可能还有单独更低的每日上限。
+头像菜单 → **API 使用情况**。免费额度不是固定的"每天 N 次调用"，而是按**魔粒**结算：每日登录可获得 200 魔粒/日，完成第 2 步的阿里云绑定后每日登录再额外获得 50 魔粒/日，合计约 **250 魔粒/日**（短期魔粒，24 小时内有效，每天 00:00 UTC+8 重置，不会累积到第二天）。调用 API-Inference 时按模型档位扣减魔粒：轻量模型约 0.5 魔粒/次，主流模型约 1 魔粒/次，旗舰模型约 2 魔粒/次，所以实际能调用的次数会随所用模型而变化，并非固定数字。这个额度是给开发、测试、原型验证用的，不适合生产环境的高并发流量；部分模型在总额度之外可能还有单独更低的每日上限。完整规则见 [API-Inference 使用限制](API-Inference使用限制%20·%20文档中心.md) 和 [魔粒体系说明](魔粒体系说明%20·%20文档中心.md)。
 
 ### 5. 把 Key 填到 `image-skill` 会读取的位置
 
@@ -61,7 +61,7 @@ modelscope:
 image-gen current-model
 ```
 
-如果能正常打印出模型 ID 而没有报错，说明 Key 放对了地方。完整的配置结构见 [`references/setup.md`](references/setup.md)，完整的安装流程见 [`AGENTS_README.md`](AGENTS_README.md)。
+如果能正常打印出模型 ID 而没有报错，说明 Key 放对了地方。完整的配置结构和安装流程见 [`references/AGENTS_README.md`](references/AGENTS_README.md)。
 
 ### 常见问题
 
@@ -69,5 +69,5 @@ image-gen current-model
 |---|---|---|
 | `401 please bind your alibaba cloud account before use` | 第 2 步（绑定阿里云 + 实名认证）没做完 | 重新走一遍第 2 步——这是最常见的卡点 |
 | 其他信息的 `401`/`403` | API Key 无效、被吊销，或填错了 | 回到第 3 步核对令牌，必要时重新生成 |
-| `429` | 每日免费额度（约 2000 次）用完了 | 等 00:00（UTC+8）每日重置，或按第 4 步查看用量 |
+| `429` | 每日免费魔粒额度用完了（具体能调用几次取决于所用模型的档位） | 等 00:00（UTC+8）魔粒每日重置，或按第 4 步查看用量 |
 | `Config file not found: config.yaml` | cwd、`~/.image-skill/`、仓库兜底位置都没有 `config.yaml` | 重新走一遍第 5 步 |

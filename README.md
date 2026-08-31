@@ -9,7 +9,7 @@ A skill for generating and editing images using Modelscope's API Inference servi
 Send this to your AI Agent:
 
 ```bash
-Install this skill: https://raw.githubusercontent.com/szchan/image-skill/main/AGENTS_README.md
+Install this skill: https://raw.githubusercontent.com/szchan/image-skill/main/references/AGENTS_README.md
 ```
 
 ## 🖼️ Examples
@@ -43,7 +43,7 @@ The `--editable` install means edits to `scripts/src/` take effect immediately, 
 
 ## ⚙️ Configuration
 
-Don't have a Modelscope API key yet? See **[GetFreeToken_ModelScope.md](GetFreeToken_ModelScope.md)** for how to register, unlock the free daily quota, and generate one.
+Don't have a Modelscope API key yet? See **[GetFreeToken_ModelScope.md](docs/GetFreeToken_ModelScope.md)** for how to register, unlock the free daily quota, and generate one.
 
 Copy `config.yaml.example` to `~/.image-skill/config.yaml` and add your API key:
 

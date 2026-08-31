@@ -2,7 +2,7 @@
 
 English | [中文](GetFreeToken_ModelScope_zh.md)
 
-This guide walks you through registering a ModelScope (魔搭) account, unlocking the free daily API quota, creating an API key, and filling it into `image-skill`'s config. It's written for a human doing this by hand; if you're an AI agent, see the "For AI agents" section in [AGENTS_README.md](AGENTS_README.md#getting-the-user-a-free-modelscope-api-key) instead — you cannot complete the steps below yourself, only guide a human through them.
+This guide walks you through registering a ModelScope (魔搭) account, unlocking the free daily API quota, creating an API key, and filling it into `image-skill`'s config. It's written for a human doing this by hand; if you're an AI agent, see the "For AI agents" section in [references/AGENTS_README.md](../references/AGENTS_README.md#getting-the-user-a-free-modelscope-api-key) instead — you cannot complete the steps below yourself, only guide a human through them.
 
 ### 1. Register / log in
 
@@ -31,7 +31,7 @@ Tokens don't expire unless you revoke them, so you only need to do this once.
 
 ### 4. Check your free quota (optional)
 
-Avatar menu → **API 使用情况 (API usage)**. The free tier is roughly **2000 API calls per day**, resetting at 00:00 (UTC+8). This is meant for development/testing/prototyping, not production traffic — some individual models may carry a lower per-model daily cap on top of the overall limit.
+Avatar menu → **API 使用情况 (API usage)**. The free tier isn't a fixed "N calls per day" — it's settled in **Magicube (魔粒)** points: daily login earns 200 Magicube/day, and once you've completed the Alibaba Cloud binding in step 2, daily login earns another 50 Magicube/day on top of that — roughly **250 Magicube/day** total (short-term Magicube, valid 24 hours, resetting at 00:00 UTC+8, doesn't carry over). Each API-Inference call spends Magicube based on the model's tier: lightweight models ~0.5 Magicube/call, mainstream models ~1 Magicube/call, flagship models ~2 Magicube/call — so how many calls that actually buys you depends on which model you use, not a fixed number. This is meant for development/testing/prototyping, not production traffic — some individual models may carry a lower per-model daily cap on top of the overall limit. Full rules: [API-Inference usage limits](API-Inference使用限制%20·%20文档中心.md) and [Magicube system explained](魔粒体系说明%20·%20文档中心.md) (ModelScope docs, Chinese only).
 
 ### 5. Put the key where `image-skill` reads it
 
@@ -61,7 +61,7 @@ Verify it worked:
 image-gen current-model
 ```
 
-If that prints a model id with no error, the key is in the right place. See [`references/setup.md`](references/setup.md) for the full config structure and [`AGENTS_README.md`](AGENTS_README.md) for the full install walkthrough.
+If that prints a model id with no error, the key is in the right place. See [`references/AGENTS_README.md`](references/AGENTS_README.md) for the full config structure and the full install walkthrough.
 
 ### Troubleshooting
 
@@ -69,5 +69,5 @@ If that prints a model id with no error, the key is in the right place. See [`re
 |---|---|---|
 | `401 please bind your alibaba cloud account before use` | Step 2 (Alibaba Cloud binding + real-name verification) wasn't completed | Redo step 2 — this is the most common blocker |
 | `401`/`403` with a different message | Invalid, revoked, or mistyped API key | Recheck the token at step 3, regenerate if needed |
-| `429` | Daily free quota (~2000 calls) exhausted | Wait for the daily reset at 00:00 UTC+8, or check usage per step 4 |
+| `429` | Daily free Magicube quota exhausted (how many calls that is depends on the model's tier) | Wait for the daily Magicube reset at 00:00 UTC+8, or check usage per step 4 |
 | `Config file not found: config.yaml` | No `config.yaml` in cwd, `~/.image-skill/`, or the repo fallback | Redo step 5 |
