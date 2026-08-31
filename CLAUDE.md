@@ -1,5 +1,1 @@
-这个项目之前由free大模型生成。刚生成的时候它根本没有skills该有的结构，也仅仅让通过正向提示词生图功能能够使用。我在此基础上调整了结构，让它贴近skills的标准结构，并使用了uv来管理python依赖。
-
-这个skill的目的是 能够使用Modelscope的每日免费额度进行：通过正向、负向提示词和指定的尺寸生成图片；通过正向、负向提示词、指定的尺寸和原图编辑图片。
-
-以及，我想知道uv是否可以将本地的python项目包装成一个tool。如果可以，那么我希望将这个skill的scripts包装成一个tool并在本地安装，这样后续Agent使用这个tool将会更方便。
+AGENTS_README.md和references/setup.md的职能有些重叠，我希望将它们合并到references/AGENTS_README.md，注意现有的引用关系要调整。
